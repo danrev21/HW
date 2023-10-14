@@ -1,3 +1,4 @@
-echo "This is a standard output"
-echo "This is an error message" >&2
-exit 0
+#!/bin/bash
+
+echo "This is a standard output" > stdout.txt
+echo "This is an error message" >&2 > stderr.txt
