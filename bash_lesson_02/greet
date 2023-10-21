@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Input your name please: $1"
+if [[ "$1" == "dan" ]];
+   then echo "Hello, Dan!";
+   else echo "Woops, not found such user" 
+fi
