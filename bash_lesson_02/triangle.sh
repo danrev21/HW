@@ -8,7 +8,6 @@ for arg in $@
     fi
   done
 
-
 # or this way:
 #if [[ ! $1 =~ ^[1-9][0-9]?$|^100$ ]] || [[ ! $2 =~ ^[1-9][0-9]?$|^100$ ]] || [[ ! $3 =~ ^[1-9][0-9]?$|^100$ ]];
 #   then echo "Input is wrong. Restart script."; exit;
