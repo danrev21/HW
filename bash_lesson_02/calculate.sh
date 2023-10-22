@@ -9,4 +9,3 @@ echo "Sum: $sum"
 echo "Product: $pro"
 echo "Quotient: $quo"
 echo "Difference: $dif"
-

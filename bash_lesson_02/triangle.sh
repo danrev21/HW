@@ -2,11 +2,12 @@
 
 # Matching arguments to regex positive integer between 1 and 100:
 for arg in $@
-  do  	
+  do
     if [[ ! $arg =~ ^[1-9][0-9]?$|^100$ ]]; then
       echo "Input is wrong. Only positive integer between 1 and 100. Restart script."; exit
     fi
-  done 
+  done
+
 
 # or this way:
 #if [[ ! $1 =~ ^[1-9][0-9]?$|^100$ ]] || [[ ! $2 =~ ^[1-9][0-9]?$|^100$ ]] || [[ ! $3 =~ ^[1-9][0-9]?$|^100$ ]];
