@@ -1,7 +1,6 @@
 #!/bin/bash
 
-read -p "Input your name please:" $1
-if [[ $REPLY == "Dan" ]] || [[ $REPLY == "Vladimir" ]]
-   then echo "Hello, $REPLY!";
+if [[ $1 == "John" ]];
+   then echo "Hello, $1!";
    else echo "Woops, not found such user" 
 fi
