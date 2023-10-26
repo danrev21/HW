@@ -20,32 +20,41 @@
 # ./temperature_transition.sh 55C
 # Output Display: 328K
 
-t=$(echo $1 | sed 's/[cC]//g')
-[[ $t -lt -273 ]] 2> /dev/null && echo "Min value of absolute zero is -273C. Try again." && exit 1
-#[[ $1 =~ *[^0-9]* ]] && echo "Input is not numerical. Try again."
+t=$(echo $1 | sed 's/[cCkK]//g')
 case $1 in
     [0-9]*[^cCkK])
         echo "Scale is except. Try again."
+	exit 1
     ;;
-    -?[0-9]*[^cCkK])
+    -[0-9]*[^cCkK])
         echo "Scale is except. Try again."
-    ;;
-    *\d*)
-        echo "Input is not numerical. Try again."
-        exit 1
-    ;;	
-    -?[0-9]*[cC])
-        echo "$((${1%[a-zA-Z]} + 273))K"
+	exit 1
     ;;
     [0-9]*[cC])
+	[[ $t -lt -273 ]] 2> /dev/null && echo "Min value of absolute zero is -273C. Try again." && exit 1    
         echo "$((${1%[a-zA-Z]} + 273))K"
     ;;
-    -?[0-9]*[kK])
-        echo "$((${1%[a-zA-Z]} - 273))C"
+    -[0-9]*[cC])
+	[[ $t -lt -273 ]] 2> /dev/null && echo "Min value of absolute zero is -273C. Try again." && exit 1
+        echo "$((${1%[a-zA-Z]} + 273))K"
     ;;
     [0-9]*[kK])
+	[[ $t -lt -273 ]] 2> /dev/null && echo "Min value of absolute zero is -273C. Try again." && exit 1
         echo "$((${1%[a-zA-Z]} - 273))C"
     ;;
-#    *[^0-9]*)
+    -[0-9]*[kK])
+	[[ $t -lt -273 ]] 2> /dev/null && echo "Min value of absolute zero is -273C. Try again." && exit 1
+        echo "$((${1%[a-zA-Z]} - 273))C"
+    ;;
+     *)
+        echo "Input is not numerical. Try again."
+        exit 1
 esac
+
+
+
+
+
+
+
 
