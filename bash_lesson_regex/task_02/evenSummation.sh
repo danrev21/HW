@@ -9,12 +9,7 @@
 # ./evenSummation.sh "1,2,3,4,5,6,7"
 # Displayed Output: 12
 
-#!/bin/bash -v
-
-#arr=$(echo $1 | sed 's/,/ /g')
-#echo ${arr[@]}
-#echo ${arr[2]}
-#echo ${arr[@]:3:4}
+#!/bin/bash 
 
 IFS=', ' read -a arr <<< $1
 
