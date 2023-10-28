@@ -14,7 +14,7 @@
 IFS=', ' read -a arr <<< $1
 
 for d in ${arr[@]}; do
-  if (( d % 2 == 0 )); then
+  if (( $d % 2 == 0 )); then
     sum=$((sum + d))  
   fi
 done
