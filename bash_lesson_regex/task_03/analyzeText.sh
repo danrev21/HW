@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Construct a script that accepts a given text input and 
 # computes the occurrences of letters, digits, and specified 
 # symbols, excluding any spaces.
@@ -16,13 +18,7 @@
 # Special Characters: 4
 # Alphabets: 9
 
-#!/bin/bash
+echo "Digits: $(echo -n $1 | sed 's/[^0-9]//g' | wc -m)"
+echo "Special Characters: $(echo -n $1 | sed 's/[^\*\!\@\#\$\%\^\&\(\)\_\+]//g' | wc -m)"
+echo "Alphabets: $(echo -n $1 | sed 's/[^a-zA-Z]//g' | wc -m)"
 
-IFS=', ' read -a arr <<< $1
-
-for i in ${arr[@]}; do
-  if (( i % 2 == 0 )); then
-    sum=$((sum + d))  
-  fi
-done
-echo $sum
