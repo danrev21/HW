@@ -11,15 +11,11 @@
 
 #!/bin/bash 
 
-IFS=', ' read -a arr <<< $1
-
+# find only even digits
+# /^[0-9]*[13579]$/d - regex of all odd numbers
+arr=$(echo $1 | sed 's/,/\n/g' | sed '/^[0-9]*[13579]$/d')
+# summing up the elements of the resulting array
 for d in ${arr[@]}; do
-  if (( $d % 2 == 0 )); then
     sum=$((sum + d))  
-  fi
 done
 echo $sum
-
-
-
-
