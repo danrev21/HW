@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Construct a program that accepts a digit (indicating the desired 
 # number of directories up to 26) as input. 
 # The program should then generate these directories 
@@ -9,13 +10,12 @@
 # ./listScript.sh 1
 # Result: 1 directory established: dir_a
 
-n=$1
-if [ $n -gt 26 ]; 
+if [ $1 -gt 26 ]; 
   then echo "Input is wrong. Restart script."
   exit
 fi 
-a=(a b c d e f g h i j k l m n o p q r s t u v w x y z)
-for (( i=0; i<$n; i++ ))
+a=({a..z})  # the same record: a=(a b c d e f g h i j k l m n o p q r s t u v w x y z)
+for (( i=0; i<$1; i++ ))
 do
   mkdir dir_${a[$i]}
 done
