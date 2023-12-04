@@ -34,6 +34,7 @@ say_hello()
 # Something is happening before the function is called.
 # Hello!
 # Something is happening after the function is called.
+
 """
 In this example:
 The my_decorator function takes another function, func, and returns 
