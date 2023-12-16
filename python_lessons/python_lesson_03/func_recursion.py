@@ -15,3 +15,39 @@ def factorial(n):
 
 result = factorial(5)
 print(result)
+
+########################################################
+# simple recursion function
+def Recursion(i):
+  print(i)
+  if i == 1:
+    return i
+  else:
+    Recursion(i-1)
+
+Recursion(5)
+# output:
+# 5
+# 4
+# 3
+# 2
+# 1
+######################################################
+# return even numbers before specified number
+
+def EvenNums(num):
+    print(num)
+    if num % 2 != 0:
+        print("Please enter even number!")
+    elif num == 2:
+        return num
+    else:
+        return EvenNums(num - 2)
+    
+EvenNums(8)
+# output:
+# 8
+# 6
+# 4
+# 2
+ 
