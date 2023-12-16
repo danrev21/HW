@@ -16,3 +16,12 @@ print(f"First function: {a}")
 
 b = mysum2(5, 1, 6)
 print(f"Second function: {b}")
+
+def say_hello():
+    name = input("Input your name: ")
+    print(f"Hello, {name}")
+say_hello()
+
+def say_hello(username):
+    print(f"Hello, {username}")
+say_hello("John")
