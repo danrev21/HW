@@ -2,7 +2,7 @@
 
 import os
 
-path = "/home/dan/Workdir/it_station_lab/HW/python_lessons/python_lesson_05/test"
+path = "/tmp/test_folder"
 
 def enumeratepaths(path=path):
   '''Returns the path to all files in a directory as a list'''

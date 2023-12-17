@@ -6,22 +6,21 @@
 # input args: path to target dir, content for each file
 # tip: try to use recursion for it
 
-import os 
-import sys
+import os
 
 def createTenFilesInDir(path, phrase="default_text"):
 
-    def file_recursion(i):
-        file_path = os.path.join(path, 'test' + str(i)) # add file to the folder path
-        with open(file_path, 'a') as file:
+    def file_recursion(i):      # creating file with content using recursion function
+        file_path = os.path.join(path, "file_test0" + str(i))
+        with open(file_path, "a") as file:
                 file.writelines(f"{phrase}\n")
                 file.close()
-        if i == 1:
-            print(f"10 files in '{path}' with content created !")
+        if i == 0:
+            return 1
         else:
              file_recursion(i-1)
 
-    file_recursion(10)
+    file_recursion(9)
     
-if __name__ == '__main__':
-    createTenFilesInDir("/tmp", "param pam pam")
+if __name__ == "__main__":
+    createTenFilesInDir("/tmp", "default_text")

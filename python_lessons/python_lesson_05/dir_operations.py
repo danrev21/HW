@@ -152,6 +152,58 @@ if __name__ == '__main__':
     else:
         inside(10)
 
+#############################################################################################
+# iteration with for loop
+import os
+
+directory = '/my_directory'
+for filename in os.listdir(directory):
+    if filename.endswith('.txt'):
+        #filename.startwith('file')
+        with open(os.path.join(directory, filename)) as f:
+            print(f.read()) 
+
+#############################################################################################
+# iteration with walk()
+import os
+
+directory = '/my_directory'
+for dirpath, dirnames, filenames in os.walk(directory):
+    for filename in filenames:
+        if filename.endswith('.txt'):
+            with open(os.path.join(dirpath, filename)) as f:
+                print(f.read())      
+
+#############################################################################################
+# iteration with for loop
+a = 0
+for a in range(10):
+    i = 0
+    for i in range(10):
+        path2 = path + "/test0" + str(a) + "/test0" + str(i)
+        os.chdir(path2) 
+        file_generator.createTenFilesInDir(path2, "param pam pam")
+        i += 1
+    a += 1        
+
+#############################################################################################
+# iteration with for loop
+a = 0
+for a in range(10):
+    
+    i = 0
+    for i in range(10):
+        file_generator.createTenFilesInDir(path + "/test0" + str(a) + "/test0" + str(i), "param pam pam")
+        i += 1
+    a += 1                             
+
+
+
+
+
+
+
+
 
 
 
