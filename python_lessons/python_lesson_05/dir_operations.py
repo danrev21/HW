@@ -195,7 +195,16 @@ for a in range(10):
     for i in range(10):
         file_generator.createTenFilesInDir(path + "/test0" + str(a) + "/test0" + str(i), "param pam pam")
         i += 1
-    a += 1                             
+    a += 1       
+
+###############################################################################################
+# поиск файлов с расширением и перемещение
+for dirpath, dirnames, filenames in os.walk(destination_path):
+    for file in filenames:
+        source_file = f"/tmp/my_dir/{file}"
+        dest_file = f"/tmp/my_org_dir/{file}"
+        if file.endswith('.txt'):
+            shutil.move(source_file, dest_file)                          
 
 
 

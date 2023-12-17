@@ -10,10 +10,10 @@ import os
 
 def createTenFilesInDir(path, phrase="default_text"):
 
-    def file_recursion(i):      # creating file with content using recursion function
+    def file_recursion(i):              # creating file with content using recursion function
         file_path = os.path.join(path, "file_test0" + str(i))
         with open(file_path, "a") as file:
-                file.writelines(f"{phrase}\n")
+                file.writelines(f"{phrase}\n")  # adding phrase lines into file
                 file.close()
         if i == 0:
             return 1
