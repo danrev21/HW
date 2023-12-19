@@ -9,23 +9,28 @@
 import os
 import shutil
 
-# def create_files_ext(path = "/tmp/my_dir"):                  # generating files with extensions    
-#     if not os.path.exists(path):
-#         os.mkdir(path)
-#     def file_recursion(i):
-#         with open(os.path.join(path, "file_test0" + str(i) + ".txt"), "a") as file:
-#             file.close()
-#         with open(os.path.join(path, "file_test0" + str(i) + ".scv"), "a") as file:
-#             file.close()
-#         with open(os.path.join(path, "file_test0" + str(i) + ".png"), "a") as file:
-#             file.close()
-#         if i == 0:
-#             return 1
-#         else:
-#             file_recursion(i-1)
-#     file_recursion(9)
-# create_files_ext()    
-   
+# generating files with extensions 'txt', 'scv', 'png'
+def create_files_ext(path = "/tmp/my_dir"):           
+    if not os.path.exists(path):
+        os.mkdir(path)
+    def file_recursion(i):
+        with open(os.path.join(path, "file_test0" + str(i) + ".txt"), "a") as file:
+            file.write("It is simple 'TXT' file")      
+            file.close()
+        with open(os.path.join(path, "file_test0" + str(i) + ".scv"), "a") as file:
+            file.write("It is 'SCV' file") 
+            file.close()
+        with open(os.path.join(path, "file_test0" + str(i) + ".png"), "a") as file:
+            file.write("This string will increase the size of 'png' files") 
+            file.close()
+        if i == 0:
+            return 1
+        else:
+            file_recursion(i-1)
+    file_recursion(9)
+create_files_ext()
+
+# organize the files   
 def files_organiser(path = "/tmp/my_dir"):    # file location path
     if not os.path.exists(path):
         os.mkdir(path)

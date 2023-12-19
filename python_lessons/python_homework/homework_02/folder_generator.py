@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# Requirements:
+# create a target folder if not exists
+# function which create 10 folders inside(10 is default value, 
+# funcsion should have input argument with folders quantity)
+# main part which create 10 folders and then 10 folders inside each one.
+
 import os 
 import sys
 import glob
