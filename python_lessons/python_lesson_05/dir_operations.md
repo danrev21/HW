@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+import os 
+import re
+import shutil
+import glob
+
+-------------------------------------------------------------------------
 # creates folders as defined in list
 
 import os 
@@ -9,18 +15,13 @@ for items in list:
     path = os.path.join(root_path, items) 
     os.mkdir(path) 
 
-#=======================================================================================
+-------------------------------------------------------------------------
 # create a target folder if not exists
 # function which create folders inside
-
-
-import os 
-
 folder = "test00"
 isExist = os.path.exists(folder)
 if not isExist:
    os.makedirs(folder)
-
 def inside():
     list = ['car', 'truck', 'bike', 'cycle', 'train'] 
     for items in list: 
@@ -28,11 +29,8 @@ def inside():
         os.mkdir(path) 
 inside()
 
-#============================================================================
+-------------------------------------------------------------------------
 # create one folder 'test00'and in it function creates defined number of folders 'test0x'
-import os 
-import sys
-
 folder = "test00"
 isExist = os.path.exists(folder)
 if not isExist:
@@ -48,11 +46,8 @@ def inside(num):
 num = int(sys.argv[1])
 inside(num)
 
-#======================================================================================
+-------------------------------------------------------------------------
 # function create defined number of folders
-import os 
-import sys
-
 def parent(i):
     items = 0
     for items in range(i):
@@ -63,18 +58,14 @@ def parent(i):
             items += 1
 parent(1)
 
-#==============================================================================================
-import os 
-import re
-import shutil
-
+-------------------------------------------------------------------------
 # remove dirs   
 pattern = r'test0*'
 for f in os.listdir("."):
     if re.search(pattern, f):
         shutil.rmtree(f)
 
-#==================================================================================        
+-------------------------------------------------------------------------        
 # create list of dirs with names 'test0x'
 current = os.getcwd()
 list_dirs = os.listdir(current)
@@ -83,50 +74,7 @@ r = re.compile("test0*")
 new_list = list(filter(r.match, list_dirs))
 print(new_list)
 
-#======================================================================#!/usr/bin/env python
-
-# create a target folder if not exists
-# function which create 10 folders inside(10 is default value, funcsion should have input argument with folders quantity)
-# main part which create 10 folders and then 10 folders inside each one.
-# другой порядок создания папок
-    
-import os 
-import sys
-
-
-def inside(*num):
-    items = 0      
-    for items in range(*num):
-        path = os.path.join(folder, 'test0' + str(items))
-        os.mkdir(path)
-        items += 1 
-
-if __name__ == '__main__':
-
-    for items in range(10):
-        folder = "test0" + str(items)
-        isExist = os.path.exists(folder)
-        if not isExist:
-            os.makedirs(folder)
-            items += 1
-            
-            if len(sys.argv) > 1:
-                num = int(sys.argv[1])
-                inside(num)               
-            else:
-                inside(10)   
-
-#================================================================================
-                #!/usr/bin/env python
-
-# create a target folder if not exists
-# function which create 10 folders inside(10 is default value, function should have input argument with folders quantity)
-# main part which create 10 folders and then 10 folders inside each one.
-
-import os 
-import sys
-import glob
-
+-------------------------------------------------------------------------
 # creating a target folderS if not exists
 items = 0
 for items in range(10):
@@ -135,6 +83,7 @@ for items in range(10):
         os.makedirs(folder)
         items += 1
 
+-------------------------------------------------------------------------
 # creating folders inside (10 is default value, function have input argument with folders quantity)
 def inside(*num):
     for folder in glob.iglob("test0*"):
@@ -144,6 +93,7 @@ def inside(*num):
             os.mkdir(path)
             items += 1          
 
+-------------------------------------------------------------------------
 # main part which create 10 folders and then 10 folders inside each one.
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -152,10 +102,8 @@ if __name__ == '__main__':
     else:
         inside(10)
 
-#############################################################################################
+-------------------------------------------------------------------------
 # iteration with for loop
-import os
-
 directory = '/my_directory'
 for filename in os.listdir(directory):
     if filename.endswith('.txt'):
@@ -163,10 +111,8 @@ for filename in os.listdir(directory):
         with open(os.path.join(directory, filename)) as f:
             print(f.read()) 
 
-#############################################################################################
+-------------------------------------------------------------------------
 # iteration with walk()
-import os
-
 directory = '/my_directory'
 for dirpath, dirnames, filenames in os.walk(directory):
     for filename in filenames:
@@ -174,7 +120,7 @@ for dirpath, dirnames, filenames in os.walk(directory):
             with open(os.path.join(dirpath, filename)) as f:
                 print(f.read())      
 
-#############################################################################################
+-------------------------------------------------------------------------
 # iteration with for loop
 a = 0
 for a in range(10):
@@ -186,7 +132,7 @@ for a in range(10):
         i += 1
     a += 1        
 
-#############################################################################################
+-------------------------------------------------------------------------
 # iteration with for loop
 a = 0
 for a in range(10):
@@ -197,7 +143,7 @@ for a in range(10):
         i += 1
     a += 1       
 
-###############################################################################################
+-------------------------------------------------------------------------
 # поиск файлов с расширением и перемещение
 for dirpath, dirnames, filenames in os.walk(destination_path):
     for file in filenames:
