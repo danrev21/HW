@@ -1,7 +1,3 @@
-"""
-text
-"""
-
 import script_name
 script_name.function_name? (or ??)
 
@@ -13,7 +9,7 @@ Calculate the average of a list of numbers.
 File:      ~/Workdir/it_station_lab/HW/python_lessons/python_lesson_03/script_name.py
 Type:      function
 
-Content of docstrings:
+# Content of docstrings:
 -A brief, one-line summary of what the function does.
 -Detailed explanations of the function's parameters, their 
  types, and their purposes.

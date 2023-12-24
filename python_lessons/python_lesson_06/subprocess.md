@@ -113,3 +113,8 @@ import subprocess
 # Example: Using the check_output method
 output = subprocess.check_output(['ls', '-l'])
 print('Output:', output.decode())
+
+----------------------------------------------------------------------
+- subprocess.PIPE: This constant is used to create a pipe to the standard input/output/error of the process, allowing interaction with those streams.
+- subprocess.DEVNULL: This constant is used to indicate that the corresponding standard stream should be redirected to the system's null device, effectively discarding the output.
+- subprocess.STDOUT: This constant is used to redirect the standard error stream to the same location as the standard output stream.
