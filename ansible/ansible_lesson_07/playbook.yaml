@@ -1,0 +1,11 @@
+---
+- name: Debug
+  hosts: localhost
+  gather_facts: no
+  vars: 
+    test:
+      - 4
+
+  tasks:
+  - debug:
+      msg: "{{ test }}"
