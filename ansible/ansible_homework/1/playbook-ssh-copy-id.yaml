@@ -51,7 +51,7 @@
       state: restarted
 
 # USED COMMANDS:
-# ssh-keygen -R 192.168.0.31...
-# ansible-playbook --check playbook1.yaml -l app1
-# ansible-playbook playbook1.yaml -l app1
-# ansible-playbook playbook1.yaml -l app1 --key-file ssh_admin_key   - after disable ssh connection
+# ssh-keygen -R 192.168.0.31
+# ansible-playbook --check playbook.yaml -l server1
+# ansible-playbook playbook1.yaml -l server1
+# ansible-playbook playbook1.yaml -l server1 --private-key ssh_admin_key   ---> after disable ssh connection  

@@ -14,9 +14,12 @@
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }}"
     loop:
-      - { regexp: '^#PermitRootLogin', line: 'PermitRootLogin no' }
-      - { regexp: '^#PermitEmptyPasswords', line: 'PermitEmptyPasswords no' } 
-      - { regexp: '^#?PasswordAuthentication yes', line: 'PasswordAuthentication no' } 
+      - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
+      - { regexp: '^#?PermitEmptyPasswords', line: 'PermitEmptyPasswords no' } 
+      - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' } 
+
+
+# localhost ansible_host=127.0.0.1 ansible_user=... ansible_password: ... ansible_become_password: ...
 
 #PermitRootLogin yes
 #PermitEmptyPasswords yes
