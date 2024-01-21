@@ -6,12 +6,9 @@
   vars:
     # for rerun this playbook uncomment variable because ssh connection setup already
     # ansible_ssh_private_key_file: "{{ playbook_dir }}/{{ ssh_keys_dir }}/{{ inventory_hostname }}_ssh_key"
-    # sshd_config_file_path: /etc/ssh
-    # sshd_config_file: /etc/ssh/sshd_config
     PermitRootLogin: "PermitRootLogin no"
     PasswordAuthentication: "PasswordAuthentication no"
     PermitEmptyPasswords: "PermitEmptyPasswords no"
-
   vars_files:
   - vars.yaml
 
