@@ -9,7 +9,7 @@ TASK [Gathering Facts] - собирает данные о системе, луч
     debug:
       var: ansible_facts  <--- позволяет увидеть инфу, которую собирает TASK [Gathering Facts]
 
-# отключить gather_factsЖ
+# отключить gather_facts:
 ---
 - name: First server preparation
   hosts: all
