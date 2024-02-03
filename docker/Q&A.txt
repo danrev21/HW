@@ -97,4 +97,21 @@ EXPOSE 8080
 CMD ["opt/tomcat/bin/catalina.sh", "run"]
 
 ==============================================================================
-какие образы 
+какие образы применять при развертыавнии инфраструктуры, каким принципам следовать
+
+==============================================================================
+анонимные волюмы применяются на практике?
+
+volume-4
+Run a container:
+container should run in detach mode;
+container should expose 80 container port to 10084 host port;
+container should create volume with name c10084_data and the next container destination: /usr/share/nginx/html;
+container name: c10084;
+used image: nginx.
+откуда имя волюма, такого нет в документации
+
+volumes-5
+почему таска выполнена только при -it
+docker run -itd --name html_data -v /root/index.html:/usr/share/nginx/html/index.html busybox
+и почему контейнер есть и в docker ps и в docker ps -a ?

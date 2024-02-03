@@ -5,9 +5,9 @@ local_user_group: dan
 
 ssh_key_filename: "{{inventory_hostname}}_ssh_key"
 sshd_config_file: /etc/ssh/sshd_config
-ssh_keys_dir: ssh_keys
+ssh_keys_dir: vault_keys
 
-vault_keys_path: ./group_vars/keys.yaml
+userpubkey: "{{ lookup('file', ssh_key_location_path+'/'+ssh_key_filename+'.pub') }}"
 
 PermitRootLogin: "PermitRootLogin no"
 PasswordAuthentication: "PasswordAuthentication no"

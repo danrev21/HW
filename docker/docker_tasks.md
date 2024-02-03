@@ -98,7 +98,7 @@ TASK
 
 FROM alpine
 RUN apk add figlet
-CMD figlet hello world   # or CMD ["figlet", "hello", "world",]
+CMD figlet hello world   # or CMD ["figlet", "hello", "world"]
 docker build -t dtyuev/figlet:1 .
 docker run dtyuev/figlet:1
  _          _ _                            _     _ 
@@ -527,12 +527,14 @@ RequiresMountsFor=/var/log/tomcat9 /var/lib/tomcat9
 # Configuration
 Environment="CATALINA_HOME=/usr/share/tomcat9"                       <------- 
 Environment="CATALINA_BASE=/var/lib/tomcat9"                         <-------    
-Environment="CATALINA_TMPDIR=/tmp"                                   <-------    these strings add into the Dockerfile
+Environment="CATALINA_TMPDIR=/tmp"                                   <-------    these strings add into the
+                                                                                        Dockerfile
 Environment="JAVA_OPTS=-Djava.awt.headless=true"                     <-------
 
 # Lifecycle
 Type=simple
-ExecStartPre=+/usr/libexec/tomcat9/tomcat-update-policy.sh           <-------   these strings all add into the Dockerfile
+ExecStartPre=+/usr/libexec/tomcat9/tomcat-update-policy.sh           <-------   these strings all add into the
+                                                                                        Dockerfile
 ExecStart=/bin/sh /usr/libexec/tomcat9/tomcat-start.sh               <-------
 SuccessExitStatus=143
 Restart=on-abort
@@ -662,18 +664,48 @@ CMD ["catalina.sh", "run"]
 ===============================================================================================
 DOCKER CONTAINERS                                                             DOCKER CONTAINERS
   
+FROM nginx
+EXPOSE 80
+CMD echo "<head></head><body style=\"background-color:green;\"></body>">/usr/share/nginx/html/index.html && nginx -g 'daemon off;'  
+docker build -t color/green:1.0 .
+docker run -d color/green:1.0 
+docker ps
 
-docker inspect sleepy_diffie | jq '.[].NetworkSettings.Ports'
 ===============================================================================================
+docker run -d -p 12025:80 --name my-container color/green:1.0
+docker port my-container 
+80/tcp -> 0.0.0.0:12025
+docker inspect my-container | jq '.[].NetworkSettings.Ports'
 
+===============================================================================================
+docker run -d -p 10084:80 --name my-container-2 color/green:1.0
+99107be2b0c0a168714ed2ac59175c83a0e2d1fa5bc0456dec9474f817a436b0
+root@docker-host /data $ docker inspect my-container-2 | jq '.[].NetworkSettings.Ports'
+{
+  "80/tcp": [
+    {
+      "HostIp": "0.0.0.0",
+      "HostPort": "10084"
+    }
+  ]
+}
+
+===============================================================================================
+# restart regardless of the exit status
+docker run -d --name=restarter_1 --restart=always busybox sleep 3
+# restart only if the container exits with a non-zero exit status
+docker run -d --name=restarter_2 --restart=on-failure:7 busybox sleep -3
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}"
+
+===============================================================================================
 docker run -d --restart always --name <cont> <image>
 docker run -d --restart always --name restarter_1 busybox sleep 3 ########
 docker rm --force restarter_1
-===============================================================================================
 
-docker run -d --restart on-failure:7 --name <cont> <image>
 ===============================================================================================
+# Using image busybox:1.28 run a command nslookup google.com. Save its output to /var/log/nslookup_google.com on the Host’s system.
 docker run --rm busybox:1.28 nslookup google.com > /var/log/nslookup_google.com
+
 ===============================================================================================
 
 docker run -d --name batman nginx
@@ -685,9 +717,12 @@ echo "Daniil Tyuev" > student
 cat student
 docker exec batman cat /data/student
 ===============================================================================================
+docker stop batman
+docker rm -f restarter_1 
 
+===============================================================================================
 docker run -d -w /data --user 1000:550 --group-add 1200 --env STUDENT=dtyuev --name box busybox sleep infinity
-$ docker run ...
+
 $ docker exec -it box sh
 /data $ id
 uid=1000 gid=550 groups=1200
@@ -703,15 +738,10 @@ PID   USER     TIME  COMMAND
 ===============================================================================================
 containers / 10
 
-docker run --rm -d \
-    --name=tomcat-man \
-    --health-cmd="curl http://localhost:8080/_cluster/health || exit 1" \
-    --health-interval=2s \
-    --health-retries=1 \
-    --health-timeout=2s \
-    tomcat:8.5.0
+docker run --rm -d --name=tomcat-man --health-cmd="curl --silent --fail localhost:8080 || exit 1" --health-interval=5s --health-retries=5 --health-timeout=2s tomcat:8.5.0
 docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}" -f name=tomcat-man
 docker inspect tomcat-man | jq -r '.[].State.Health'
+
 ===============================================================================================
 containers / 11
 
@@ -723,6 +753,8 @@ docker inspect nginx_wrong   =отсюда определяем биндинг (
 
 на хосте исправить конф (убрать - перед 1024 из задания)
 vim /var/nginx/nginx.conf
+docker restart nginx_wrong
+либо
 docker run -d -p 10091:80 -v /tmp/index.html:/usr/share/nginx/html/index.html -v /var/nginx/nginx.conf:/etc/nginx/nginx.conf --name nginx_wrong nginx:alpine
 
 ===============================================================================================
@@ -744,7 +776,14 @@ docker volume create - Create a volume;
 docker volume inspect - Display detailed information on one or more volumes;
 docker volume ls - List volumes;
 docker volume prune - Remove all unused local volumes;
-docker volume rm - Remove one or more volu
+docker volume rm - Remove one or more volumes
+
+===============================================================================================
+docker volume inspect volume-1 | jq '.[].Mountpoint'
+docker volume inspect volume-2 | jq '.[].Options.device'
+docker volume inspect volume-1 | jq '.[].Mountpoint'
+docker volume inspect volume-3 | jq '.[].Options.type'
+docker volume inspect volume-3 | jq '.[].Options.device'
 
 ===============================================================================================
 VOLUMES / 2
@@ -755,7 +794,7 @@ docker run -d -p 10082:80 -v /opt/index.html:/usr/share/nginx/html/index.html --
 VOLUMES / 3
 
 docker run -d -p 10083:80 -v /usr/share/nginx/html --name c10083 nginx
-docker run -d -p 10083:80 -v /usr/share/nginx/html --name c10083 nginx
+docker inspect c10083 | jq '.[].Mounts[].Source'
 ls -lah /var/lib/docker/volumes/c148792b3891a97254387153acbdc0e75644331412de41bab5be60a108306b1c/_data
 echo 'This is c10083 container' > var/lib/docker/volumes/c148792b3891a97254387153acbdc0e75644331412de41bab5be60a108306b1c/_data/index.html
 
@@ -763,6 +802,7 @@ echo 'This is c10083 container' > var/lib/docker/volumes/c148792b3891a9725438715
 VOLUMES / 4
 
 docker run -d -p 10084:80 -v c10084_data:/usr/share/nginx/html --name c10084 nginx
+docker inspect c10084 | jq '.[].Mounts[].Source'
 ls -lah /var/lib/docker/volumes/c10084_data/_data
 echo 'This is the c10084 container' > /var/lib/docker/volumes/c10084_data/_data/index.html
 
@@ -773,16 +813,18 @@ docker run -itd -v /root/index.html:/usr/share/nginx/html/index.html --name html
 docker run -d -p 10085:80 --volumes-from html_data --name=c10085 nginx
 docker run -d -p 10086:80 --volumes-from html_data --name=c10086 nginx
 
-
-
 ===============================================================================================
 VOLUMES / 6
 
 docker volume create c10087_custom_volume
 docker inspect c10087_custom_volume
+docker volume inspect c10087_custom_volume | jq '.[].Mountpoint'
 cd /var/lib/docker/volumes/c10087_custom_volume/_data
 echo "My custom docker volume with name c10087_custom_volume" > index.html
 docker run -d -p 10087:80 -v c10087_custom_volume:/usr/share/nginx/html --name c10087 nginx 
+
+docker inspect --format='{{.HostConfig.Binds}}' c10087
+docker inspect c10087 | jq '.[].Mounts'
 
 ===============================================================================================
 VOLUMES / 7  quiz   2 1 1 3 3 
@@ -790,22 +832,112 @@ VOLUMES / 7  quiz   2 1 1 3 3
 ===============================================================================================
 ===============================================================================================
 DOCKER NETWORKS                                                                 DOCKER NETWORKS
- 
+
+1
+docker network ls
+docker network inspect
+docker network inspect bridge | grep masq*
+docker network inspect my_custom_network_1 | jq '.[].Driver'
+docker network inspect my_custom_network_2 | jq '.[].IPAM.Config[].Subnet'
+docker network inspect my_custom_network_1 | grep mtu*
+docker network inspect my_custom_network_2 | jq '.[].IPAM.Config[].Gateway'
+
+===============================================================================================
 2
-docker run -d --network host --name httpd_host httpd
+docker network ls
+NETWORK ID     NAME                  DRIVER    SCOPE
+8202a2d6095b   bridge                bridge    local
+889848feeeab   host                  host      local
+d87199772efb   my_custom_network_1   bridge    local
+99c97e461c79   my_custom_network_2   bridge    local
+f58b4ebdb071   none                  null      local
+docker run -d --name httpd_host --network host httpd
+
 ===============================================================================================
 3
 docker run -it -d --network bridge --name alpine_busy alpine
 docker run -it -d --network bridge --name busybox_busy busybox
+docker network inspect bridge 
+[
+    {
+        "Name": "bridge",
+        "Id": "8202a2d6095b6ef751e68ceee9134c22798b0d8ec3612ebcfd9262c5b1f5b7da",
+        "Created": "2024-01-30T21:50:52.81271173Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.18.0.0/16",
+                    "Gateway": "172.18.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "6e74a4311c44acf5e8d3d4117d6dc22b87ebe7d8c6765584f9ce5ec0b5e9a9c9": {
+                "Name": "alpine_busy",
+                "EndpointID": "fd0347b16c69a5ba55bcc4bfe3144ee4bcafc8c1aeaf966451c204f129319745",
+                "MacAddress": "02:42:ac:12:00:02",
+                "IPv4Address": "172.18.0.2/16",
+                "IPv6Address": ""
+            },
+            "fd2cf7defd3690a61ede5b54a5b79431df324b211d467f5d307331e2e9efa48d": {
+                "Name": "busybox_busy",
+                "EndpointID": "fcace2e5751b2a00650fd588df834a9847f4ae64a7fd1b5479325c052aff7e91",
+                "MacAddress": "02:42:ac:12:00:03",
+                "IPv4Address": "172.18.0.3/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.bridge.default_bridge": "true",
+            "com.docker.network.bridge.enable_icc": "true",
+            "com.docker.network.bridge.enable_ip_masquerade": "true",
+            "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+            "com.docker.network.bridge.name": "docker0",
+            "com.docker.network.driver.mtu": "1500"
+        },
+        "Labels": {}
+    }
+]
+
+===============================================================================================
+4
+docker network create -d bridge dtyuev-bridge --subnet 123.45.1.0/24 --ip-range 123.45.1.0/24 --label createdby=Daniil_Tyuev
+docker network inspect dtyuev-bridge
+
 ===============================================================================================
 5
-контейнеры пинг и понг приконнектил к именованому бриджу (созданный кажется в 
-предыдущем задании) и они пингуются. но тогда 50 баллов за это задание, и за 
-networks не 100 а 92.
+docker ps
+docker network ls
+docker network inspect bridge ---> сеть по умолчанию, понимает только айпишники, поэтому
+создаем именованный бридж со своей сетью
+docker network create -d bridge net1 --subnet 152.18.0.0/16 --ip-range 152.18.0.0/16 --label createdby=Daniil
+
+присоединяем контейнеры пинг и понг к этому именованому бриджу 
+docker network connect net1 --ip 152.18.0.5 pong
+docker network connect net1 --ip 152.18.0.4 ping
+docker network inspect net1
+и они пингуются
+docker exec ping ping -c3 pong
+
 ===============================================================================================
 6
+docker network ls
+docker network inspect dtyuev-bridge 
 docker run -d --network dtyuev-bridge --name nginx-dtyuev-bridge --label createdby=Daniil_Tyuev nginx
 docker run -d --network dtyuev-bridge --name tomcat-dtyuev-bridge --label createdby=Daniil_Tyuev tomcat
+
 ===============================================================================================
 7   quiz 4 1
 

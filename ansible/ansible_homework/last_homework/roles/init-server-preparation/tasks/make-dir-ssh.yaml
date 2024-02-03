@@ -8,7 +8,7 @@
 
 - name: Get ssh keys path  
   set_fact:
-    ssh_key_location_path: "{{ cwd.stdout }}/{{ ssh_keys_dir }}"
+    ssh_key_location_path: "{{ cwd.stdout }}/inventory/{{ ssh_keys_dir }}"
 
 - name: Make dir for ssh-keys
   file:

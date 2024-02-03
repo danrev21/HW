@@ -31,11 +31,18 @@ Info
 docker history - shows history of image;
 docker tag - tags an image to a name (local or registry).
 
+# Lifecycle Container:
+docker create - creates a container but does not start it
+docker start - starts a container so it is running
+docker restart - stops and starts a container
+docker rename - allows the container to be renamed
+docker update - updates a container’s resource limits
+docker attach - will connect to a running container
+
 # Running Contianers
 docker run --user 1000:0 jenkins id
 docker run --group-add 123 jenkins id
 docker run --workdir /var/jenkins_home jenkins pwd
-docker run -it -e MYVAR="My Variable" centos env | grep MYVAR
 docker run -d --label app=web1 nginx
 docker run -d myhttpd:1.0
 docker run -P -d myhttpd:1.0    #work if specifyed EXPOSE in Dockerfile
@@ -44,7 +51,8 @@ docker run -d --restart=always --name sleeper centos sleep 5
 docker run -d --restart=unless-stopped --name sleeper centos sleep 5
 docker run centos cat /etc/redhat-release
 docker run -it centos bash
-docker run -dit centos
+docker run -it -e MYVAR="My Variable" centos env | grep MYVAR
+docker run -dit centos    #  Run detached and interactive           
 docker run -dit busybox
 docker run -d -p 80:80 -v /usr/share/nginx/html nginx
 docker run -d -p 80:80 -v nginx_data:/usr/share/nginx/html nginx
@@ -78,6 +86,11 @@ docker exec -it test ps waux
 # Stopping and Removing Contianers
 docker ps     # shows running containers
 docker ps -a  # shows all containers - running and stopped
+docker restart - stops and starts a container
+docker pause - pauses a running container, “freezing” it in place
+docker unpause - will unpause a running container
+docker wait - blocks until running container stops
+docker kill - sends a SIGKILL to a running container
 docker stop h8082
 docker container tomcat-man stop
 docker rm 014e5efa5ca9
@@ -87,14 +100,31 @@ docker ps -qa | xargs -r docker rm
 docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}" -f name=tomcat-man
 
 # Working with Network
+docker network ls - List networks
 docker network connect - Connect a container to a network
 docker network create - Create a network
+docker network create -d bridge dtyuev-bridge --subnet 123.45.1.0/24 --ip-range 123.45.1.0/24 --label createdby=Daniil_Tyuev
+docker network create -d bridge net1 --subnet 152.18.0.0/16 --ip-range 152.18.0.0/16 --label createdby=Daniil
+docker network connect net1 --ip 152.18.0.5 pong    # connect containr pong with ip 
 docker network disconnect - Disconnect a container from a network
+docker info | grep Network
+docker run --net=none -d --name inNoneContainer busybox    # Run a container with no network connectivity
+docker run -d --network=host --name=nginx nginx     # Run an Nginx container using the host's network namespace
+docker run -d --name httpd_host --network host httpd
+docker run -it -d --network bridge --name alpine_busy alpine
 docker network inspect - Display detailed information on one or more networks
-docker network ls - List networks
+docker network inspect bridge | jq '.[].Containers'    # Use jq to display
+docker network inspect my_custom_network_1 | jq '.[].Driver'
+docker network inspect my_custom_network_2 | jq '.[].IPAM.Config[].Subnet'
+docker network inspect my_custom_network_1 | grep mtu*
+docker network inspect my_custom_network_2 | jq '.[].IPAM.Config[].Gateway'
+
+docker run -d --name=inmybridge1 --net=my_bridge_network centos sleep infinity    # Run a detached CentOS container 
+                                                                                  # named inmybridge1 attached to the
+                                                                                  # 'my_bridge_network'.
 docker network prune - Remove all unused networks
 docker network rm - Remove one or more networks
-docker info | grep Network
+
 
 # Working with logs
 docker logs container_name 
@@ -102,6 +132,12 @@ docker logs container_id
 docker logs -f …
 docker run -dt --log-driver=journald --name httpd httpd
 journalctl -ab CONTAINER_NAME=httpd
+
+docker events - gets events from container
+docker port - shows public facing port of container
+docker top - shows running processes in container
+docker stats - shows containers’ resource usage statistics
+docker diff - shows changed files in the container’s FS
 
 docker inspect nginx:latest | jq -r '.[].RootFS'               # number of layers
 docker inspect ubuntu:19.10 | jq -r '.[].GraphDriver.Name'     # name of GraphDriver
@@ -117,15 +153,38 @@ docker inspect contbox | jq '.[].NetworkSettings.IPPrefixLen' (.Gateway' .MacAdd
 
 docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}" -f name=tomcat-man
 docker image ls --format="{{.Repository}}:{{.Tag}}\t{{.Size}}" | grep nginx
+docker inspect --format='{{.HostConfig.Binds}}' c10087
 
-
+# Working with Volumes
+docker volume create - Create a volume
 docker volume create --name http-custom-data
-docker volume ls
-docker volume inspect http-custom-data
+docker volume ls - List volumes
+docker run -d --volumes-from html_data -p 81:80 nginx
+docker run -d --volumes-from html_data -p 10085:80 --name=c10085 nginx
+docker volume inspect - Display detailed information on one or more volumes
+docker volume inspect volume-1 | jq '.[].Mountpoint'
+docker inspect c10083 | jq '.[].Mounts[].Source'        # узнать volume on the host (например anonimouse volume)
+docker volume inspect volume-2 | jq '.[].Options.device'
+docker volume inspect volume-1 | jq '.[].Mountpoint'
+docker volume inspect volume-3 | jq '.[].Options.type'
+docker volume inspect volume-3 | jq '.[].Options.device'
+docker volume prune - Remove all unused local volumes;
+docker volume rm - Remove one or more volumes.
+
 
 docker commit c3f279d17e0a  svendowideit/testimage:version3
 docker commit --change='CMD ["apachectl", "-DFOREGROUND"]' -c "EXPOSE 80" c3f279d17e0a  svendowideit/testimage:version4
 docker commit --change "ENV DEBUG=true" c3f279d17e0a  svendowideit/testimage:version3
+
+# Import / Export:
+docker cp - copies files or folders between a container and the local filesystem
+docker export - turns container filesystem into tarball archive stream to STDOUT
+
+# Executing Commands:
+docker exec - to execute a command in container
+
+
+
 
 --------
 Docker-Compose commands
