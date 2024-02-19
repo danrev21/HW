@@ -27,9 +27,25 @@ docker save     - saves an image to a tar archive stream to STDOUT with all pare
 docker tag nginx:latest nginx:new                 # create image copy but new tag
 docker tag 0e5574283393 fedora/httpd:version1.0   # the same
            
-Info
-docker history - shows history of image;
-docker tag - tags an image to a name (local or registry).
+# Images Info
+docker inspect nginx:latest | jq -r '.[].RootFS'               # number of layers
+docker inspect ubuntu:19.10 | jq -r '.[].GraphDriver.Name'     # name of GraphDriver
+docker inspect busybox:latest | jq -r '.[].Size'               # size in bytes
+docker inspect tomcat-man | jq -r '.[].State.Health'
+docker inspect tomcat-man | jq '.[].ContainerConfig.ExposedPorts'
+docker inspect tomcat-man | jq '.[].ContainerConfig.Hostname'
+docker inspect contbox | jq '.[].Config.Labels'
+docker inspect contbox | jq '.[].NetworkSettings.Ports'
+docker inspect contbox | jq '.[].NetworkSettings.Networks'  #all except port
+docker inspect contbox | jq '.[].NetworkSettings.IPAddress'  #separate data
+docker inspect contbox | jq '.[].NetworkSettings.IPPrefixLen' (.Gateway' .MacAddress')
+docker image inspect mariadb:latest | jq '.[].Config.Entrypoint'
+docker image ls --format="{{.Repository}}:{{.Tag}}\t{{.Size}}" | grep nginx
+docker inspect --format='{{.HostConfig.Binds}}' c10087
+docker history - shows history of image
+docker history mariadb:latest | grep ENTRYPOINT
+docker history mariadb:latest | grep CMD
+docker tag - tags an image to a name (local or registry)
 
 # Lifecycle Container:
 docker create - creates a container but does not start it
@@ -66,6 +82,8 @@ docker run --rm -d \
     --health-timeout=2s \
     tomcat:8.5.0
 docker run -d --volumes-from html_data -p 81:80 nginx
+docker run -d --name ubuntu --volume /var/run/docker.sock:/var/run/docker.sock:ro ubuntu sleep infinity ---> docker in docker
+
 
 # example docker run:
 docker run -it \
@@ -126,34 +144,21 @@ docker network prune - Remove all unused networks
 docker network rm - Remove one or more networks
 
 
-# Working with logs
+# Containers Logs
 docker logs container_name 
 docker logs container_id
 docker logs -f …
 docker run -dt --log-driver=journald --name httpd httpd
 journalctl -ab CONTAINER_NAME=httpd
-
+docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}" -f name=tomcat-man
+docker ps --format "table {{.Names}}" | xargs docker rm -f ------ remove all containers
 docker events - gets events from container
 docker port - shows public facing port of container
 docker top - shows running processes in container
 docker stats - shows containers’ resource usage statistics
+docker stats tomcat --no-stream  - CONTAINER ID, NAME, CPU %, MEM USAGE/LIMIT, MEM %, NET I/O, BLOCK I/O, PIDS
+docker stats tomcat --format json --no-stream
 docker diff - shows changed files in the container’s FS
-
-docker inspect nginx:latest | jq -r '.[].RootFS'               # number of layers
-docker inspect ubuntu:19.10 | jq -r '.[].GraphDriver.Name'     # name of GraphDriver
-docker inspect busybox:latest | jq -r '.[].Size'               # size in bytes
-docker inspect tomcat-man | jq -r '.[].State.Health'
-docker inspect tomcat-man | jq '.[].ContainerConfig.ExposedPorts'
-docker inspect tomcat-man | jq '.[].ContainerConfig.Hostname'
-docker inspect contbox | jq '.[].Config.Labels'
-docker inspect contbox | jq '.[].NetworkSettings.Ports'
-docker inspect contbox | jq '.[].NetworkSettings.Networks'  #all except port
-docker inspect contbox | jq '.[].NetworkSettings.IPAddress'  #separate data
-docker inspect contbox | jq '.[].NetworkSettings.IPPrefixLen' (.Gateway' .MacAddress')
-
-docker ps --format "table {{.Names}}\t{{.ID}}\t{{.Status}}" -f name=tomcat-man
-docker image ls --format="{{.Repository}}:{{.Tag}}\t{{.Size}}" | grep nginx
-docker inspect --format='{{.HostConfig.Binds}}' c10087
 
 # Working with Volumes
 docker volume create - Create a volume
@@ -171,7 +176,35 @@ docker volume inspect volume-3 | jq '.[].Options.device'
 docker volume prune - Remove all unused local volumes;
 docker volume rm - Remove one or more volumes.
 
+# Namespaces
+docker run --rm -it --pid=host alpine  - can see the host processes in alpine
+docker run --rm -it --pid=container:my-nginx alpine - alpine container that attaches the --pid namespace 
+                                                      to the my-nginx container
+docker run -d -t --network=container:nginx-net --name net-tools alpine - альпина и нжинкс одном пр-ве имен сети
+docker run -d --uts=host --name busy-host busybox sleep infinity - run container in UTS namespace of the Host
 
+# CGROUPS
+# memory
+docker run --help | grep '\--mem'
+  -m, --memory bytes                   Memory limit
+      --memory-reservation bytes       Memory soft limit
+      --memory-swap bytes              Swap limit equal to memory plus swap: '-1' to enable unlimited swap
+      --memory-swappiness int          Tune container memory swappiness (0 to 100) (default -1)
+docker run -d --name tomcat --memory 100m --memory-swap -1 --memory-reservation 50m tomcat:jdk8-openjdk-slim
+# cpu
+docker run --help | grep cpu
+      --cpu-period int                 Limit CPU CFS (Completely Fair Scheduler) period
+      --cpu-quota int                  Limit CPU CFS (Completely Fair Scheduler) quota
+      --cpu-rt-period int              Limit CPU real-time period in microseconds
+      --cpu-rt-runtime int             Limit CPU real-time runtime in microseconds
+  -c, --cpu-shares int                 CPU shares (relative weight)
+      --cpus decimal                   Number of CPUs
+      --cpuset-cpus string             CPUs in which to allow execution (0-3, 0,1)
+      --cpuset-mems string             MEMs in which to allow execution (0-3, 0,1)
+docker run -d --name cpu-stress --cpu-quota=20000 alpine md5sum /dev/urandom
+
+
+# Create image from container:
 docker commit c3f279d17e0a  svendowideit/testimage:version3
 docker commit --change='CMD ["apachectl", "-DFOREGROUND"]' -c "EXPOSE 80" c3f279d17e0a  svendowideit/testimage:version4
 docker commit --change "ENV DEBUG=true" c3f279d17e0a  svendowideit/testimage:version3

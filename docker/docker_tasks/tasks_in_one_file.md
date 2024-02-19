@@ -1,6 +1,7 @@
 
-UBUNTU - /var/www/html/index.html
-CENTOS ALPINE - /usr/share/nginx/html/index.html
+
+UBUNTU CENTOS ALPINE - /usr/share/nginx/html/index.html
+UBUNTU - /var/www/html/index.html ??
 
 
 
@@ -94,11 +95,29 @@ ENV MAINTAINER=Daniil_Tyuev
 docker build -t dtyuev/mybox .
 
 ===============================================================================================
-TASK
+
+An ENTRYPOINT allows you to configure a container that will run as an executable
+The main purpose of a CMD is to provide defaults for an executing container
+If you would like your container to run the same executable every time, then you should consider using ENTRYPOINT in combination with CMD
+ENTRYPOINT/CMD has 2 forms:
+exec form: ["echo", "hello", "world"] - preferred form, but doesn’t support shell env variables
+shell form: echo hello world - supports shell env variables
+Both ENTRYPOINT and CMD specify what process (simply saying command) should run in the container as a main process.
+
+CMD is an instruction designed for establishing a default command that users can conveniently modify based on their specific needs.
+When a Dockerfile contains multiple CMD directives, it’s crucial to note that only the instructions from the last CMD will take effect, allowing for clear and predictable customization of the container’s default behavior.
+
+TASK 1
+Create /tasks/1/Dockerfile, base image: alpine
+Install figlet package with apk tool
+Define CMD to run figlet hello world command
+Build dtyuev/figlet:1 image
+ For this task both forms of CMD (shell or exec) do the same, no difference!
 
 FROM alpine
 RUN apk add figlet
 CMD figlet hello world   # or CMD ["figlet", "hello", "world"]
+
 docker build -t dtyuev/figlet:1 .
 docker run dtyuev/figlet:1
  _          _ _                            _     _ 
@@ -107,24 +126,56 @@ docker run dtyuev/figlet:1
 | | | |  __/ | | (_) |  \ V  V / (_) | |  | | (_| |
 |_| |_|\___|_|_|\___/    \_/\_/ \___/|_|  |_|\__,_|
 docker run dtyuev/figlet:1 figlet 'hi there!'
-docker run dtyuev/figlet:1 figlet -f script 'hi there!'
 
 ===============================================================================================
-=TASK=
+TASK 2
+By running container, replace image default cmd with your own.
+ Don’t change Dockerfile!
+
+docker run dtyuev/figlet:1 figlet 'hi there!'
+ _     _   _   _                   _ 
+| |__ (_) | |_| |__   ___ _ __ ___| |
+| '_ \| | | __| '_ \ / _ \ '__/ _ \ |
+| | | | | | |_| | | |  __/ | |  __/_|
+|_| |_|_|  \__|_| |_|\___|_|  \___(_)
+
+docker run dtyuev/figlet:1 figlet -f script 'hi there!'
+ _               _                    
+| |    o        | |                  |
+| |         _|_ | |     _   ,_    _  |
+|/ \   |     |  |/ \   |/  /  |  |/  |
+|   |_/|_/   |_/|   |_/|__/   |_/|__/o
+
+===============================================================================================
+TASK 3
+In that case, it makes sense to split entire command into 2 parts:
+
+“main command” - implemented by ENTRYPOINT
+its “arguments” - implemented by CMD (in cojunction with ENTRYPOINT)
+ENTRYPOINT	CMD
+figlet	hello world
+ In this task we have to use exec forms of ENTRYPOINT and CMD, otherwise it won’t work!
+
+Create /tasks/3/Dockerfile, you can use /tasks/1/Dockerfile as an example
+Define figlet -f mini as ENTRYPOINT ( use exec form)
+Specify hello world as CMD ( use exec form)
+Build dtyuev/figlet:3 image
 
 FROM alpine
 RUN apk add figlet
 ENTRYPOINT ["figlet", "-f", "mini"]
 CMD ["hello", "world"]
+
 docker build -t dtyuev/figlet:3 .
+
 docker run dtyuev/figlet:3
-                        
 |_  _ || _       _ ._| _| 
 | |(/_||(_) \/\/(_)| |(_| 
-docker run dtyuev/figlet:3 hi there
 
+docker run dtyuev/figlet:3 hi there
 |_ o  _|_|_  _ .__  
 | ||   |_| |(/_|(/_ 
+
 docker run dtyuev/figlet:3 -f slant hi there
     __    _    __  __                 
    / /_  (_)  / /_/ /_  ___  ________ 
@@ -133,13 +184,19 @@ docker run dtyuev/figlet:3 -f slant hi there
 /_/ /_/_/   \__/_/ /_/\___/_/   \___/ 
 
 ===============================================================================================
-=TASK=
+TASK 4
+Create /tasks/4/Dockerfile, you can use /tasks/1/Dockerfile as an example
+Define figlet -f smslant as ENTRYPOINT ( use exec form)
+Specify hello world as CMD ( use shell form)
+Build dtyuev/figlet:4 image
 
 FROM alpine
 RUN apk add figlet
 ENTRYPOINT ["figlet", "-f", "smslant"]
 CMD hello world
+
 docker build -t dtyuev/figlet:4 .
+
 docker run dtyuev/figlet:4
     ___     _          __   _                    _          _ _       
    / / |__ (_)_ __    / /__| |__           ___  | |__   ___| | | ___  
@@ -152,6 +209,7 @@ __      _____  _ __| | __| |
 \ \ /\ / / _ \| '__| |/ _` |
  \ V  V / (_) | |  | | (_| |
   \_/\_/ \___/|_|  |_|\__,_|
+
 docker run dtyuev/figlet:4 hi there
  _     _   _   _                   
 | |__ (_) | |_| |__   ___ _ __ ___ 
@@ -159,8 +217,30 @@ docker run dtyuev/figlet:4 hi there
 | | | | | | |_| | | |  __/ | |  __/
 |_| |_|_|  \__|_| |_|\___|_|  \___|
 
+# Conclusion:
+So, “hello world” from CMD instruction goes to default image CMD which is /bin/sh -c and all of this comes to our ENTRYPOINT.
+
+Docker runs following process:
+
+figlet /bin/sh -c hello world
+But in the 2nd example it replaces this mess of /bin/sh -c and hello world to the command we are providing:
+
+figlet hi there
+
+
 ===============================================================================================
-=TASK=
+TASK 5
+1. Try Shell Form:
+1.1. Create /tasks/5/Dockerfile-shell, base image: alpine
+1.2. Define environement variable VERSION equal to v1.2.3
+1.3. Set CMD in shell form: echo VERSION=$VERSION
+1.4. Build dtyuev/figlet:5-shell image
+
+2. Try Exec Form:
+1.1. Create /tasks/5/Dockerfile-exec, base image: alpine
+1.2. Define environement variable VERSION equal to v1.2.3
+1.3. Set CMD in exec form: ["echo", "VERSION=$VERSION"]
+1.4. Build dtyuev/figlet:5-exec image
 
 FROM alpine
 ENV VERSION=v1.2.3
@@ -172,17 +252,61 @@ ENV VERSION=v1.2.3
 CMD ["echo", "VERSION=$VERSION"]
 docker build -t dtyuev/figlet:5-exec -f Dockerfile-exec .
 
+# With “shell” CMD form:
 docker run dtyuev/figlet:5-shell
 VERSION=v1.2.3
 docker run -e VERSION=v2.3.4 dtyuev/figlet:5-shell
 VERSION=v2.3.4
+# With “exec” CMD form:
 docker run dtyuev/figlet:5-exec
 VERSION=$VERSION
 docker run -e VERSION=v2.3.4 dtyuev/figlet:5-exec
 VERSION=$VERSION
 
+What happens?
+Command in “shell” form goes to /bin/sh and it evaluates variable to its value. With “exec” form this doesn’t happen.
+
+But with the strong desire you could work around this:
+
+CMD ["echo", "VERSION=$VERSION"]
+CMD ["/bin/sh", "-c", "echo VERSION=$VERSION"]
 # change into Dockerfile-exec CMD as:
-CMD ["/bin/sh", "-c", "echo VERSION=$VERSION"]  
+CMD ["/bin/sh", "-c", "echo VERSION=$VERSION"] 
+
+==============================================================================================
+TASK 6
+Please pull mariadb:latest image, inspect it and answer the questions below:
+Q1 What is mariadb:latest ENTRYPOINT?
+docker history mariadb:latest | grep ENTRYPOINT
+<missing>      2 months ago   ENTRYPOINT ["docker-entrypoint.sh"]             0B        buildkit.dockerfile.v0
+
+Q2 What is mariadb:latest CMD?
+docker history mariadb:latest | grep CMD
+5bf2b86cbac5   2 months ago   CMD ["mariadbd"]                                0B        buildkit.dockerfile.v0
+<missing>      2 months ago   /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B        
+
+===============================================================================================
+# Summary ENTRYPOINT & CMD
+Here’s a summary of using ENTRYPOINT and CMD instructions in a Dockerfile:
+
+CMD Instruction:
+
+Used to provide default values for an executing container.
+Specifies the default command and/or parameters that will be executed when the container is run.
+If a Dockerfile has multiple CMD instructions, only the last one takes effect.
+The CMD instruction can be overridden at runtime by providing arguments to docker run.
+ENTRYPOINT Instruction:
+
+Similar to CMD, but the main difference is that it provides an executable specifically as the default command.
+Unlike CMD, the command and its parameters are not ignored when Docker runs the container with an alternative command.
+If a Dockerfile has both CMD and ENTRYPOINT instructions, the CMD instruction’s arguments are appended to the ENTRYPOINT.
+Best Practices:
+
+Use CMD to set the default command that can be easily overridden.
+Use ENTRYPOINT to set the main command for the container. It’s often used with CMD to provide default arguments.
+Combine ENTRYPOINT and CMD judiciously to make your image more flexible and configurable.
+If you need to run the container as an executable (e.g., docker run myimage arg1 arg2), use ENTRYPOINT.
+Remember that both CMD and ENTRYPOINT can be overridden at runtime by providing arguments to the docker run command.
 
 ===============================================================================================
 ===============================================================================================
@@ -1028,7 +1152,7 @@ Stopping 2_web_1 ... done
 
 ===============================================================================================
 3
-docker-compose down
+docker-compose down  --> remove
 ===============================================================================================
 
 4
@@ -1061,6 +1185,9 @@ services:
       driver: journald
 ===============================================================================================
 6
+task: Request to the nginx should return tomcat default page (create nginx 
+      config file and mount it to /etc/nginx/nginx.conf)
+
 version: "3"
 services:
   web:
@@ -1074,22 +1201,50 @@ services:
   tomcat:
     container_name: tomcat_task6
     image: tomcat:8.0
-----------------------------------
+-------------
 #nginx.conf#
 events {
     worker_connections 1024;
 }
 
-http {
- server {
-    listen 80;
-    server_name localhost;
+    http {
+        server {
+          listen 80;
+          server_name localhost;
 
-    location / {
-      proxy_pass http://tomcat:8080;
+          location / {
+            proxy_pass http://tomcat:8080;
+          }
     }
-  }
 }
+---то же самое---
+worker_processes 1;
+
+events { worker_connections 1024; }
+
+http {
+
+	sendfile on;
+
+	server {
+		listen 80;
+		server_name 127.0.0.1;
+
+		location / {
+
+			proxy_pass http://tomcat:8080;
+			proxy_redirect off;
+			proxy_set_header Host $host;
+			proxy_set_header X-Real-IP $remote_addr;
+			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+			proxy_set_header X-Forwarded-Host $server_name;
+		}
+	}
+}
+
+curl -IL 0.0.0.0:10086
+curl -s 0.0.0.0:10086 | grep title
+
 ===============================================================================================
 7
 version: '3'
@@ -1105,6 +1260,7 @@ services:
     network_mode: "service:pod"
 
 pod - можно заменить на что угодно (например, pause)
+curl -sIL 0.0.0.0:10087 
 ===============================================================================================
 8
 # этот ямл дан, по нему воссоздать ресурсы
@@ -1138,7 +1294,22 @@ docker run -d --name redis-server --hostname redis-server --env "ALLOW_EMPTY_PAS
 
 ===============================================================================================
 9
-# у нас есть:
+# Task:
+Please investigate these files and reproduse containers/volumes/networks/etc with docker build/create/run ... commands.
+
+ Use the same names as in docker-compose.yml file and as docker compose is supposed to name the respective and dependant resources
+
+You supposed to run all neccessary command with proper (researched) options:
+
+docker build ...
+docker network create ...
+docker run ...
+docker run ...
+Checking
+For self-checking try to make request to web container:
+
+root@docker-host /task/9/nginx_php $  curl 34-116-225-247.gcp.xip.playpit.net:10089
+Connected successfully. Great work!
 # Dockerfile:
 FROM php:7.2-apache
 RUN apt-get update
@@ -1194,7 +1365,8 @@ catch(PDOException $e)
 
 -------------------------------
 docker build -t web_locally_build .
-
+# чтобы узнать как должна называться сеть надо запустить docker compose и docker network ls, затем удалить 
+# созданную компоузом сеть и создать вручную))
 docker network create nginx_php_default
 
 docker run -d -p 10089:80 -v /task/9/nginx_php/app:/var/www/html/ --network nginx_php_default --hostname web --env "ALLOW_OVERRIDE=true" --name web web_locally_build
@@ -1230,7 +1402,136 @@ DAEMON                                                                          
 1
 usermod -aG docker dtyuev
 ===============================================================================================
+# DAEMON CONFIG FILE для выполнения задач
+{
+  "allow-nondistributable-artifacts": [],
+  "api-cors-header": "",
+  "authorization-plugins": [],
+  "bip": "",
+  "bridge": "",
+  "builder": {
+    "gc": {
+      "enabled": true,
+      "defaultKeepStorage": "10GB",
+      "policy": [
+        { "keepStorage": "10GB", "filter": ["unused-for=2200h"] },
+        { "keepStorage": "50GB", "filter": ["unused-for=3300h"] },
+        { "keepStorage": "100GB", "all": true }
+      ]
+    }
+  },
+  "cgroup-parent": "",
+  "containerd": "/run/containerd/containerd.sock",
+  "containerd-namespace": "docker",
+  "containerd-plugin-namespace": "docker-plugins",
+  "data-root": "",
+  "debug": true,
+  "default-address-pools": [
+    {
+      "base": "172.30.0.0/16",
+      "size": 24
+    },
+    {
+      "base": "172.31.0.0/16",
+      "size": 24
+    }
+  ],
+  "default-cgroupns-mode": "private",
+  "default-gateway": "",
+  "default-gateway-v6": "",
+  "default-network-opts": {},
+  "default-runtime": "runc",
+  "default-shm-size": "64M",
+  "default-ulimits": {
+    "nofile": {
+      "Hard": 64000,
+      "Name": "nofile",
+      "Soft": 64000
+    }
+  },
+  "dns": [],
+  "dns-opts": [],
+  "dns-search": [],
+  "exec-opts": [],
+  "exec-root": "",
+  "experimental": false,
+  "features": {},
+  "fixed-cidr": "",
+  "fixed-cidr-v6": "",
+  "group": "",
+  "host-gateway-ip": "",
+  "hosts": [],
+  "proxies": {
+    "http-proxy": "http://proxy.example.com:80",
+    "https-proxy": "https://proxy.example.com:443",
+    "no-proxy": "*.test.example.com,.example.org",
+  },
+  "icc": false,
+  "init": false,
+  "init-path": "/usr/libexec/docker-init",
+  "insecure-registries": [],
+  "ip": "0.0.0.0",
+  "ip-forward": false,
+  "ip-masq": false,
+  "iptables": false,
+  "ip6tables": false,
+  "ipv6": false,
+  "labels": [],
+  "live-restore": true,
+  "log-driver": "json-file",
+  "log-level": "",
+  "log-opts": {
+    "cache-disabled": "false",
+    "cache-max-file": "5",
+    "cache-max-size": "20m",
+    "cache-compress": "true",
+    "env": "os,customer",
+    "labels": "somelabel",
+    "max-file": "5",
+    "max-size": "10m"
+  },
+  "max-concurrent-downloads": 3,
+  "max-concurrent-uploads": 5,
+  "max-download-attempts": 5,
+  "mtu": 0,
+  "no-new-privileges": false,
+  "node-generic-resources": [
+    "NVIDIA-GPU=UUID1",
+    "NVIDIA-GPU=UUID2"
+  ],
+  "oom-score-adjust": 0,
+  "pidfile": "",
+  "raw-logs": false,
+  "registry-mirrors": [],
+  "runtimes": {
+    "cc-runtime": {
+      "path": "/usr/bin/cc-runtime"
+    },
+    "custom": {
+      "path": "/usr/local/bin/my-runc-replacement",
+      "runtimeArgs": [
+        "--debug"
+      ]
+    }
+  },
+  "seccomp-profile": "",
+  "selinux-enabled": false,
+  "shutdown-timeout": 15,
+  "storage-driver": "",
+  "storage-opts": [],
+  "swarm-default-advertise-addr": "",
+  "tls": true,
+  "tlscacert": "",
+  "tlscert": "",
+  "tlskey": "",
+  "tlsverify": true,
+  "userland-proxy": false,
+  "userland-proxy-path": "/usr/libexec/docker-proxy",
+  "userns-remap": ""
+}
+========================================================================================
 2
+# Change Logging Driver of docker daemon settings from json-file to syslog.
 vim /etc/docker/daemon.json
 {
   "log-driver": "syslog",
@@ -1240,9 +1541,12 @@ vim /etc/docker/daemon.json
 }
 systemctl restart docker
 docker info --format '{{.LoggingDriver}}'
+syslog
+https://signoz.io/blog/docker-syslog/
 
 ===============================================================================================
 3
+# Add in logging “debug”.
 vim /etc/docker/daemon.json
 {
   "log-driver": "syslog",
@@ -1255,27 +1559,60 @@ systemctl restart docker
 docker info --format '{{.Debug}}'
 docker run -dt --name mycontainer busybox
 journalctl -u docker | grep mycontainer
+https://dockerlabs.collabnix.com/beginners/components/daemon/
+
 ===============================================================================================
 4
+# Configure Docker Daemon to keep containers alive during daemon downtime
+
 vim /etc/docker/daemon.json
 {
   "log-driver": "syslog",
-  "debug": true,              ## add this
-  "live-restore": true,
+  "debug": true,              
+  "live-restore": true,        ## add this
   "log-opts": {
     "syslog-address": "udp://1.2.3.4:1111"
   }
 }
 systemctl restart docker
 docker info --format '{{ .LiveRestoreEnabled }}'
-docker run -d --net host nginx
-docker ps
-curl -IL localhost
-systemctl stop docker
-systemctl status docker
-curl -IL localhost
+true
+---
+# Published ports are discarded when using host network mode
+$ docker run -d --net host nginx
+878ef36564891484d3aa7b86a61f91cabccf87112640ea7f88528457a7374c0d
+# Check that Docker runs nginx container
+$ docker ps
+CONTAINER ID   IMAGE     COMMAND                  CREATED          STATUS          PORTS     NAMES
+ff8078413482   nginx     "/docker-entrypoint.…"   38 seconds ago   Up 37 seconds             ...
+# Check that Nginx server responds
+$ curl -IL localhost
+HTTP/1.1 200 OK
+Server: nginx/1.19.10
+...
+Stopping Docker Daemon
+$ systemctl stop docker
+$ systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+     Active: inactive (dead) since ...
+     ...
+Checking that Nginx works
+# Check that Nginx server responds
+$ curl -IL localhost
+HTTP/1.1 200 OK
+Server: nginx/1.19.10
+…
 ===============================================================================================
 5
+# What you know so far is that you can operate with Docker Daemon using local connection by unix socket: /var/run/docker.sock. But what about accessing Docker Daemon running on remote Host?
+It’s possible if you enable TCP Socket.
+You can use both modes: unix socket and TCP simultaneously.
+Task:
+Expose Docker Daemon to TCP Socket: 0.0.0.0:2375, disable Unix socket.
+ You should make sure that this option is specified either in /etc/docker/daemon.json or in docker systemd file.
+ Don’t forget to restart docker service
+
 vim /etc/docker/daemon.json
 
 {
@@ -1291,15 +1628,108 @@ See "systemctl status docker.service" and "journalctl -xe" for details.
 vim /lib/systemd/system/docker.service
 IN
 ExecStart=/usr/bin/dockerd --containerd=/run/containerd/containerd.sock
-Delete : -H fd://
-
-
+Delete : -H fd://The command dockerd -H fd:// starts the Docker daemon with the default Unix socket (fd://). This allows clients to communicate with the Docker daemon using the Unix socket instead of the default TCP socket. The -H flag is used to specify the host or address on which the Docker daemon should listen for client connections. In this case, fd:// refers to file descriptor 0, which is typically used for standard input.
 
 systemctl daemon-reload
 systemctl start docker
 
+Verification:
+Checking Daemon Status:
+root@docker-host ~ $ systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sun 2021-05-23 18:07:39 UTC; 12s ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 911 (dockerd)
+      Tasks: 16
+     Memory: 41.1M
+...
+In case of any problems with starting docker daemon use the following command to troubleshoot:
+
+journalctl -u docker
+systemctl status docker
+Checking Port:
+root@docker-host ~ $ apt-get install net-tools
+root@docker-host ~ $ netstat -lntp | grep dockerd
+tcp   0   0   127.0.0.1:2375    0.0.0.0:*   LISTEN   911/dockerd
+Checking docker response by TCP:
+docker client configuration:
+
+# Connection by unix socket disabled:
+root@docker-host ~ $ docker info -f '{{ .ServerVersion }}' 
+panic: reflect: indirection through nil pointer to embedded struct [recovered]
+        panic: reflect: indirection through nil pointer to embedded struct
+...
+
+# Configuring connection by tcp socket:
+root@docker-host ~ $ export DOCKER_HOST=tcp://localhost:2375
+root@docker-host ~ $ docker info -f '{{ .ServerVersion }}' 
+20.10.6
+Using curl:
+
+root@docker-host ~ $ curl -s 0.0.0.0:2375/info | jq -r '.ServerVersion'
+20.10.6
+
+https://docs.docker.com/config/daemon/remote-access/
+
 ===============================================================================================
 6
+# Docker Infrastructure
+
+docker:
+The Docker CLI tool. It talks to docker daemon (service) to pass necessary instructions to be performed (pull, run, stop, build, etc).
+dockerd:
+The Docker daemon itself. It provides all the nice UX features of Docker.
+docker-containerd:
+It’s a daemon which handles all the low-level container management tasks, storage, image distribution, network attachment, etc…
+docker-containerd-ctr:
+A lightweight CLI for communicating directly with containerd.
+docker-runc:
+A lightweight binary for running containers. Deals with the lowlevel interfacing with Linux capabilities like cgroups, namespaces, etc …
+docker-containerd-shim:
+After runC launches the container, it exits (it allows us not to have any long-running processes responsible for our container). The shim is the component which stays between containerd and runC to facilitate this.
+docker-proxy:
+A tool responsible for proxying container’s ports to Host’s interface
+Useful commands:
+$ DOCKER_HOST=tcp://0.0.0.0:2375 # if it's set to use TCP socket
+
+$ docker version
+$ docker version -f '{{ .Client.Version }}'
+$ docker version -f '{{ .Server.Version }}'
+
+$ docker info
+$ docker info -f '{{ json . }}' | jq
+Checking Services
+Containerd:
+
+$ systemctl status containerd
+● containerd.service - containerd container runtime
+     Loaded: loaded (/lib/systemd/system/containerd.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2024-02-08 15:58:10 UTC; 53min ago
+       Docs: https://containerd.io
+   Main PID: 61 (containerd)
+      Tasks: 19
+     Memory: 20.0M
+        CPU: 2.239s
+     CGroup: /system.slice/containerd.service
+             ├─ 61 /usr/bin/containerd
+             └─980 /usr/bin/containerd-shim-runc-v2 -namespace moby -id 8fd9b1687a1660daf9feabec99a259cb11b3a0796a57cf71971ecdca8629bad3 -address /run/containerd/containerd.sock
+
+Feb 08 15:58:10 docker-host containerd[61]: time="2024-02-08T15:58:10.885082568Z" level=info msg="loading plugin \"io.containerd.internal.v1.tracing\"..." type=io.containerd.internal.v1
+Feb 08 15:58:10 docker-host containerd[61]: time="2024-02-08T15:58:10.885538620Z" level=error msg="failed to initialize a tracing processor \"otlp\"" error="no OpenTelemetry endpoint: skip plugin"
+Feb 08 15:58:10 docker-host containerd[61]: time="2024-02-08T15:58:10.886179706Z" level=info msg=serving... address=/run/containerd/containerd.sock.ttrpc
+Feb 08 15:58:10 docker-host containerd[61]: time="2024-02-08T15:58:10.886367657Z" level=info msg=serving... address=/run/containerd/containerd.sock
+Feb 08 15:58:10 docker-host systemd[1]: Started containerd container runtime.
+Feb 08 15:58:10 docker-host containerd[61]: time="2024-02-08T15:58:10.888307578Z" level=info msg="containerd successfully booted in 0.057292s"
+Feb 08 16:20:03 docker-host containerd[61]: time="2024-02-08T16:20:03.348875651Z" level=info msg="loading plugin \"io.containerd.event.v1.publisher\"..." runtime=io.containerd.runc.v2 type=io.containerd.event.v1
+Feb 08 16:20:03 docker-host containerd[61]: time="2024-02-08T16:20:03.349189812Z" level=info msg="loading plugin \"io.containerd.internal.v1.shutdown\"..." runtime=io.containerd.runc.v2 type=io.containerd.internal.v1
+Feb 08 16:20:03 docker-host containerd[61]: time="2024-02-08T16:20:03.349209682Z" level=info msg="loading plugin \"io.containerd.ttrpc.v1.task\"..." runtime=io.containerd.runc.v2 type=io.containerd.ttrpc.v1
+Feb 08 16:20:03 docker-host containerd[61]: time="2024-02-08T16:20:03.350154144Z" level=info msg="starting signal loop" namespace=moby path=/run/containerd/io.containerd.runtime.v2.task/moby/8fd9b1687a1660daf9feabec99a259cb11b3a0796a57cf71971ecdca8629bad3 pid=980 runtime=io.containerd.runc.v2
+Documentation:
+https://docs.docker.com/config/daemon/
+https://docs.docker.com/engine/reference/commandline/dockerd/
+
 
 systemctl edit docker.service чтобы открыть файл переопределения для docker.serviceв текстовом редакторе.
 
@@ -1317,37 +1747,4 @@ ExecStart=/usr/bin/dockerd -H fd:// -H tcp://127.0.0.1:2375
 
  sudo systemctl restart docker.service
 ......
-
-
-
-
-
-
-
-===============================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -34,3 +34,46 @@ $ docker run --help | grep volumes
 Доступ из контейнеров приложений:
 Контейнеры приложений могут получать доступ к данным, хранящимся в контейнере данных, с помощью подключения томов. Это позволяет нескольким контейнерам приложений совместно использовать и взаимодействовать с одним и тем же набором данных.
 Важно отметить, что хотя контейнеры данных были обычным явлением в более ранних версиях Docker, современные лучшие практики часто отдают предпочтение использованию именованных томов и служб томов для управления постоянством данных. Именованные тома обеспечивают большую гибкость, простоту использования и интеграцию с Docker Compose, что делает их предпочтительным выбором для управления данными в современных установках Docker.
+
+Расоложение volumes:
+/var/lib/docker/volumes/
+
+===============================================================================================
+docker run -d -p 10082:80 -v /opt/index.html:/usr/share/nginx/html/index.html --name c10082 nginx
+
+===============================================================================================
+docker run -d -p 10083:80 -v /usr/share/nginx/html --name c10083 nginx
+
+===============================================================================================
+docker run -d -p 10084:80 -v c10084_data:/usr/share/nginx/html --name c10084 nginx
+
+===============================================================================================
+docker run -td -v /root/index.html:/usr/share/nginx/html/index.html --name html_data busybox
+or
+docker run -d -v /root/index.html:/usr/share/nginx/html/index.html --name html_data busybox sleep infinity
+docker run -d -p 10085:80 --volumes-from html_data --name=c10085 nginx
+docker run -d -p 10086:80 --volumes-from html_data --name=c10086 nginx
+
+===============================================================================================
+docker volume create c10087_custom_volume
+docker run -d -p 10087:80 -v c10087_custom_volume:/usr/share/nginx/html --name c10087 nginx 
+
+===============================================================================================
+docker inspect --format='{{.HostConfig.Binds}}' c10087
+docker inspect c10087 | jq '.[].Mounts'
+docker inspect c10083 | jq '.[].Mounts[].Source'
+docker inspect c10087_custom_volume
+docker volume inspect c10087_custom_volume | jq '.[].Mountpoint'
+docker inspect c10087 | jq '.[].Mounts'
+
+docker volume inspect c10084_data[
+    {
+        "CreatedAt": "2024-02-03T18:34:55Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/c10084_data/_data",
+        "Name": "c10084_data",
+        "Options": null,
+        "Scope": "local"
+    }
+]

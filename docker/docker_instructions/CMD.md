@@ -50,3 +50,15 @@ Best Practices:
 Комбинируйте ENTRYPOINT и CMD разумно, чтобы сделать ваш образ более гибким и настраиваемым.
 Если вам нужно запустить контейнер как исполняемый файл (например, docker run myimage arg1 arg2), используйте ENTRYPOINT.
 
+# From tasks:
+An ENTRYPOINT allows you to configure a container that will run as an executable
+The main purpose of a CMD is to provide defaults for an executing container
+If you would like your container to run the same executable every time, then you should consider using ENTRYPOINT in combination with CMD
+ENTRYPOINT/CMD has 2 forms:
+exec form: ["echo", "hello", "world"] - preferred form, but doesn’t support shell env variables
+shell form: echo hello world - supports shell env variables
+Both ENTRYPOINT and CMD specify what process (simply saying command) should run in the container as a main process.
+
+CMD is an instruction designed for establishing a default command that users can conveniently modify based on their specific needs.
+When a Dockerfile contains multiple CMD directives, it’s crucial to note that only the instructions from the last CMD will take effect, allowing for clear and predictable customization of the container’s default behavior.
+
