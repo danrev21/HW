@@ -22,8 +22,8 @@ services:
     restart: always
     environment:
       WORDPRESS_DB_HOST:  db:3306
-      WORDPRESS_DB_USER: admin
-      WORDPRESS_DB_PASSWORD: password
+      WORDPRESS_DB_USER: MYSQL_USER
+      WORDPRESS_DB_PASSWORD: MYSQL_PASSWORD
       WORDPRESS_DB_NAME: wordpress
 
   db:
@@ -32,7 +32,17 @@ services:
       - ./data/mysql:/var/lib/mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: MYSQL_ROOT_PASSWORD
       MYSQL_DATABASE: wordpress
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: password
+      MYSQL_USER: MYSQL_USER
+      MYSQL_PASSWORD: MYSQL_PASSWORD
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    links:
+      - db:mysql
+    ports:
+      - 8081:80
+    environment:
+      MYSQL_ROOT_PASSWORD: MYSQL_ROOT_PASSWORD
